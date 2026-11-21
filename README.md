@@ -15,7 +15,7 @@ bars. It uses the device's HID protocol and provides built-in lighting effects.
 See [BUILD.md](BUILD.md) for build dependencies from source
 
 ```bash
-ols-cli --brightness 10 --speed 1 --effect fire -power_on
+ols-cli --brightness 10 --speed 1 --effect fire
 ```
 
 Use `ols-cli --help` to display the command usage. Available effects are
@@ -24,11 +24,12 @@ Use `ols-cli --help` to display the command usage. Available effects are
 
 ## Options
 
-- `--effect <name>` selects an effect (required).
+- `--effect <name>` selects an effect (required unless `poweroff` is present).
 - `--brightness <0-255>` sets brightness.
 - `--speed <1-10>` sets effect speed (default: `5`).
-- `-power_on` connects to the device and turns the LEDs on before starting the
-  effect.
+- `-poweroff`, `--poweroff`, `--power-off`, or their `power_off` underscore
+  variants turn the LEDs off with a fade.
+  This option ignores all other CLI arguments.
 - `-h` or `--help` prints usage.
 
 The CLI must connect to the device before an effect can play. Color and
