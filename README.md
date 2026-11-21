@@ -1,6 +1,6 @@
-# openLightsSync CLI
+# openLightS CLI
 
-A native Linux command-line controller for SyncLight / iCUE-compatible USB LED
+A lightweigth implementation of OpenLightsSync / iCUE-compatible USB LED
 bars. It uses the device's HID protocol and provides built-in lighting effects.
 
 ## Supported devices
@@ -12,8 +12,7 @@ bars. It uses the device's HID protocol and provides built-in lighting effects.
 
 ## Build and run
 
-See [BUILD.md](BUILD.md) for build dependencies and instructions, and
-[INSTALL.md](INSTALL.md) for USB permissions.
+See [BUILD.md](BUILD.md) for build dependencies from source
 
 ```bash
 ols-cli --brightness 10 --speed 1 --effect fire -power_on
