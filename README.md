@@ -1,6 +1,6 @@
 # openLightS CLI
 
-A lightweigth implementation of OpenLightsSync / iCUE-compatible USB LED
+A lightweigth implementation of [OpenLightsSync](https://github.com/crisnar/openLightsSync/tree/main) / iCUE-compatible USB LED
 bars. It uses the device's HID protocol and provides built-in lighting effects.
 
 ## Supported devices
@@ -15,10 +15,10 @@ bars. It uses the device's HID protocol and provides built-in lighting effects.
 See [BUILD.md](BUILD.md) for build dependencies from source
 
 ```bash
-ols-cli --brightness 10 --speed 1 --effect fire
+ols --brightness 10 --speed 1 --effect fire
 ```
 
-Use `ols-cli --help` to display the command usage. Available effects are
+Use `ols --help` to display the command usage. Available effects are
 `rainbow`, `pulse`, `chase`, `chase_bounce`, `breathe`, `fire`, `wave`,
 `sparkle`, `heartbeat`, and `static`.
 
@@ -27,9 +27,7 @@ Use `ols-cli --help` to display the command usage. Available effects are
 - `--effect <name>` selects an effect (required unless `poweroff` is present).
 - `--brightness <0-255>` sets brightness.
 - `--speed <1-10>` sets effect speed (default: `5`).
-- `-poweroff`, `--poweroff`, `--power-off`, or their `power_off` underscore
-  variants turn the LEDs off with a fade.
-  This option ignores all other CLI arguments.
+- `--poweroff`, `-poweroff` underscore turn the LEDs off with a fade and ignores all other CLI arguments.
 - `-h` or `--help` prints usage.
 
 The CLI must connect to the device before an effect can play. Color and
