@@ -1,9 +1,6 @@
 # Rust / Cargo
-src-tauri/target/
+target/
 src-tauri/gen/
-
-# Tauri
-src-tauri/Cargo.lock
 
 # IDE
 .vscode/

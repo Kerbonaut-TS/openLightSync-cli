@@ -21,10 +21,10 @@ sudo pacman -S base-devel pkgconf systemd hidapi
 From the repository root:
 
 ```bash
-cargo build --manifest-path src-tauri/Cargo.toml --release
+cargo build --manifest-path Cargo.toml --release
 ```
 
-The binary is created at `src-tauri/target/release/ols-cli`. Run it with:
+The binary is created at `target`. Run it with:
 
 ```bash
 src-tauri/target/release/ols-cli --brightness 10 --speed 1 --effect fire -power_on
