@@ -15,7 +15,7 @@ struct Options {
     effect: String,
     brightness: Option<u8>,
     speed: f64,
-    power_on: bool,
+    poweroff: bool,
 }
 
 fn main() {
@@ -55,45 +55,80 @@ fn run() -> Result<(), String> {
     let brightness = options.brightness.or(saved.brightness);
     hid.open_device()?;
 
-    if options.power_on {
+    if options.poweroff {
         let color = hid.get_global_color();
-        hid.power_on(1, color.r, color.g, color.b, brightness)?;
-        saved.section = 1;
-        saved.r = color.r;
-        saved.g = color.g;
-        saved.b = color.b;
-    } else if let Some(value) = brightness {
-        hid.set_brightness(value)?;
-    }
+        power_off_fade(
+            hid.as_ref(),
+            brightness,
+            2000,
+            if saved.section == 0 { 1 } else { saved.section },
+            color.r,
+            color.g,
+            color.b,
+        )?;
+        Ok(())
+    } else {
+        if let Some(value) = brightness {
+            hid.set_brightness(value)?;
+        }
+        if let Some(value) = options.brightness {
+            saved.brightness = Some(value);
+        }
+        if options.brightness.is_some() {
+            save_state(&saved);
+        }
 
-    if let Some(value) = options.brightness {
-        saved.brightness = Some(value);
-    }
-    if options.power_on || options.brightness.is_some() {
-        save_state(&saved);
-    }
+        let effects = EffectRunner::new();
+        effects.start(
+            &options.effect,
+            hid.clone(),
+            hid.get_total_leds(),
+            options.speed,
+        )?;
 
-    let effects = EffectRunner::new();
-    effects.start(
-        &options.effect,
-        hid.clone(),
-        hid.get_total_leds(),
-        options.speed,
-    )?;
+        while effects.is_running() {
+            thread::sleep(Duration::from_secs(1));
+        }
 
-    while effects.is_running() {
-        thread::sleep(Duration::from_secs(1));
+        Ok(())
     }
-
-    Ok(())
 }
+
+
+fn power_off_fade(
+    hid: &HidController,
+    current_brightness: Option<u8>,
+    duration_ms: u64,
+    section: u8,
+    r: u8,
+    g: u8,
+    b: u8,
+) -> Result<(), String> {
+    std::thread::sleep(std::time::Duration::from_millis(80));
+    let steps = (duration_ms / 100).max(8) as u32;
+    let color_payload = Some(hid.build_section_payload(section, r, g, b));
+    hid.fade_to_off(current_brightness, color_payload, duration_ms, steps)
+}
+
 
 fn parse_args() -> Result<Option<Options>, String> {
     let mut args = env::args().skip(1);
+    let raw_args: Vec<String> = args.by_ref().collect();
+    if raw_args.iter().any(|arg| {
+        arg == "-poweroff"|| arg == "--power-off"
+    }) {
+        return Ok(Some(Options {
+            effect: String::new(),
+            brightness: None,
+            speed: 5.0,
+            poweroff: true,
+        }));
+    }
+
+    let mut args = raw_args.into_iter();
     let mut effect = None;
     let mut brightness = None;
     let mut speed = 5.0;
-    let mut power_on = false;
 
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -125,7 +160,6 @@ fn parse_args() -> Result<Option<Options>, String> {
                     .parse::<f64>()
                     .map_err(|_| "--speed must be a number from 1 to 10".to_string())?;
             }
-            "-power_on" | "--power_on" | "--power-on" => power_on = true,
             _ => return Err(format!("unknown argument: {arg}\nTry --help for usage.")),
         }
     }
@@ -151,13 +185,14 @@ fn parse_args() -> Result<Option<Options>, String> {
         effect,
         brightness,
         speed,
-        power_on,
+        poweroff: false,
     }))
 }
 
 fn print_usage() {
     println!(
-        "Usage: ols-cli --effect <name> [--brightness <0-255>] [--speed <1-10>] [-power_on]\n\
+        "Usage: ols-cli --effect <name> [--brightness <0-255>] [--speed <1-10>]\n\
+         Usage: ols-cli [-poweroff | --poweroff | --power-off]\n\
          Available effects: {}",
         AVAILABLE_EFFECTS.join(", ")
     );

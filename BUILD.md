@@ -27,5 +27,5 @@ cargo build --manifest-path Cargo.toml --release
 The binary is created at `target`. Run it with:
 
 ```bash
-src-tauri/target/release/ols-cli --brightness 10 --speed 1 --effect fire -power_on
+./ols --brightness 10 --speed 1 --effect fire
 ```
