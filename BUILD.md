@@ -1,79 +1,31 @@
-# Building from source
+# Building the CLI
 
 ## Prerequisites
 
-- **Rust toolchain** (stable, 1.70+): https://rustup.rs
-- **Tauri CLI v2**:
-  ```bash
-  cargo install tauri-cli --version "^2"
-  ```
-
-## Build dependencies
+- Rust stable toolchain
+- Native HID build dependencies:
 
 ```bash
 # Debian/Ubuntu
-sudo apt install \
-  build-essential \
-  libglib2.0-dev \
-  libgtk-3-dev \
-  libwebkit2gtk-4.1-dev \
-  libsoup-3.0-dev \
-  libhidapi-dev \
-  libpulse-dev \
-  libayatana-appindicator3-dev \
-  libjavascriptcoregtk-4.1-dev
+sudo apt install build-essential pkg-config libudev-dev libhidapi-dev
 
 # Fedora
-sudo dnf install \
-  gcc gcc-c++ \
-  glib2-devel \
-  gtk3-devel \
-  webkit2gtk4.1-devel \
-  libsoup3-devel \
-  hidapi-devel \
-  pulseaudio-libs-devel \
-  libayatana-appindicator-gtk3-devel \
-  javascriptcoregtk4.1-devel
+sudo dnf install gcc pkgconf-pkg-config systemd-devel hidapi-devel
 
 # Arch
-sudo pacman -S \
-  base-devel \
-  glib2 \
-  gtk3 \
-  webkit2gtk-4.1 \
-  libsoup3 \
-  hidapi \
-  libpulse \
-  libayatana-appindicator
+sudo pacman -S base-devel pkgconf systemd hidapi
 ```
 
-## Build commands
+## Build
+
+From the repository root:
 
 ```bash
-# Development (debug, with hot reload of the UI)
-cargo tauri dev
-
-# Release build (optimized binary + bundles)
-cargo tauri build
-
-# .deb package only
-cargo tauri build --bundles deb
+cargo build --manifest-path src-tauri/Cargo.toml --release
 ```
 
-## Output
+The binary is created at `src-tauri/target/release/ols-cli`. Run it with:
 
-| Artifact | Path |
-|----------|------|
-| Binary | `src-tauri/target/release/openLightsSync` |
-| .deb | `src-tauri/target/release/bundle/deb/openLightsSync_0.1.0_amd64.deb` |
-
-Install the .deb with:
 ```bash
-sudo dpkg -i src-tauri/target/release/bundle/deb/openLightsSync_0.1.0_amd64.deb
+src-tauri/target/release/ols-cli --brightness 10 --speed 1 --effect fire -power_on
 ```
-
-## Notes
-
-- AppImage bundling may fail in headless environments; the .deb target is reliable.
-- The frontend is plain HTML/CSS/JS in the `ui/` folder — no Node.js or npm required.
-- `cargo tauri dev` serves the UI from `ui/` directly with hot reload.
