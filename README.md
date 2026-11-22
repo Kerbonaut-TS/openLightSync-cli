@@ -1,6 +1,6 @@
 # openLightSync -- Command Line Interface (CLI)
 
-A lightweigth implementation of [OpenLightsSync](https://github.com/crisnar/openLightsSync/tree/main) / iCUE-compatible USB LED
+A lightweigth implementation of [OpenLightsSync](https://github.com/crisnar/openLightsSync/tree/main) from Crisnar to control iCUE-compatible USB LED
 bars. It uses the device's HID protocol and provides built-in lighting effects.
 
 ## Supported devices
