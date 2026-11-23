@@ -27,6 +27,7 @@ Use `ols --help` to display the command usage. Available effects are
 - `--effect <name>` selects an effect (required unless `poweroff` is present).
 - `--brightness <0-255>` sets brightness.
 - `--speed <1-10>` sets effect speed (default: `5`).
+- `-r <0-255>`, `-g <0-255>`, `-b <0-255>` set the static effect RGB color.
 - `--poweroff`, `-poweroff` underscore turn the LEDs off with a fade and ignores all other CLI arguments.
 - `-h` or `--help` prints usage.
 

@@ -15,6 +15,9 @@ struct Options {
     effect: String,
     brightness: Option<u8>,
     speed: f64,
+    r: Option<u8>,
+    g: Option<u8>,
+    b: Option<u8>,
     poweroff: bool,
 }
 
@@ -44,7 +47,19 @@ fn run() -> Result<(), String> {
         *hid.sections.lock().unwrap() = sections;
     }
 
-    if saved.r > 0 || saved.g > 0 || saved.b > 0 {
+    if options.effect == "static" {
+        if options.r.is_some() || options.g.is_some() || options.b.is_some() {
+            saved.r = options.r.unwrap_or(saved.r);
+            saved.g = options.g.unwrap_or(saved.g);
+            saved.b = options.b.unwrap_or(saved.b);
+            save_state(&saved);
+        }
+        hid.set_global_color(LedColor {
+            r: saved.r,
+            g: saved.g,
+            b: saved.b,
+        });
+    } else if saved.r > 0 || saved.g > 0 || saved.b > 0 {
         hid.set_global_color(LedColor {
             r: saved.r,
             g: saved.g,
@@ -121,6 +136,9 @@ fn parse_args() -> Result<Option<Options>, String> {
             effect: String::new(),
             brightness: None,
             speed: 5.0,
+            r: None,
+            g: None,
+            b: None,
             poweroff: true,
         }));
     }
@@ -129,6 +147,9 @@ fn parse_args() -> Result<Option<Options>, String> {
     let mut effect = None;
     let mut brightness = None;
     let mut speed = 5.0;
+    let mut r = None;
+    let mut g = None;
+    let mut b = None;
 
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -160,6 +181,37 @@ fn parse_args() -> Result<Option<Options>, String> {
                     .parse::<f64>()
                     .map_err(|_| "--speed must be a number from 1 to 10".to_string())?;
             }
+            "-r" | "--red" => {
+                let value = args
+                    .next()
+                    .ok_or_else(|| "-r requires a value from 0 to 255".to_string())?;
+                r = Some(
+                    value
+                        .parse::<u8>()
+                        .map_err(|_| "-r must be between 0 and 255".to_string())?,
+                );
+            }
+            "-g" | "--green" => {
+                let value = args
+                    .next()
+                    .ok_or_else(|| "-g requires a value from 0 to 255".to_string())?;
+                g = Some(
+                    value
+                        .parse::<u8>()
+                        .map_err(|_| "-g must be between 0 and 255".to_string())?,
+                );
+            }
+            "-b" | "--blue" => {
+                let value = args
+                    .next()
+                    .ok_or_else(|| "-b requires a value from 0 to 255".to_string())?;
+                b = Some(
+                    value
+                        .parse::<u8>()
+                        .map_err(|_| "-b must be between 0 and 255".to_string())?,
+                );
+            }
+
             _ => return Err(format!("unknown argument: {arg}\nTry --help for usage.")),
         }
     }
@@ -171,6 +223,8 @@ fn parse_args() -> Result<Option<Options>, String> {
         )
     })?;
 
+
+
     if !AVAILABLE_EFFECTS.contains(&effect.as_str()) && effect != "static" {
         return Err(format!(
             "unknown effect '{effect}'. Available effects: {}",
@@ -180,18 +234,24 @@ fn parse_args() -> Result<Option<Options>, String> {
     if !speed.is_finite() || !(1.0..=10.0).contains(&speed) {
         return Err("--speed must be between 1 and 10".to_string());
     }
+    if effect != "static" && (r.is_some() || g.is_some() || b.is_some()) {
+        return Err("-r, -g, and -b can only be used with --effect static".to_string());
+    }
 
     Ok(Some(Options {
         effect,
         brightness,
         speed,
+        r,
+        g,
+        b,
         poweroff: false,
     }))
 }
 
 fn print_usage() {
     println!(
-        "Usage: ols-cli --effect <name> [--brightness <0-255>] [--speed <1-10>]\n\
+        "Usage: ols-cli --effect <name> [--brightness <0-255>] [--speed <1-10>] [-r <0-255> -g <0-255> -b <0-255>]\n\
          Usage: ols-cli [-poweroff | --poweroff | --power-off]\n\
          Available effects: {}",
         AVAILABLE_EFFECTS.join(", ")
